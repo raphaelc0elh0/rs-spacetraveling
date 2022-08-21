@@ -5,7 +5,7 @@ import { FiCalendar, FiUser } from 'react-icons/fi';
 import { getPrismicClient } from '../services/prismic';
 import format from '../utils/format';
 
-// import commonStyles from '../styles/common.module.scss';
+import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 
 interface Post {
@@ -41,7 +41,7 @@ export default function Home({ postsPagination }: HomeProps) {
             <a>
               <strong>{post.data.title}</strong>
               <p>{post.data.subtitle}</p>
-              <div>
+              <div className={commonStyles.postDetails}>
                 <span>
                   <FiCalendar /> {post.first_publication_date}
                 </span>

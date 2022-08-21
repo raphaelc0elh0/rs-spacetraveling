@@ -1,1 +1,46 @@
-// TODO
+.container {
+  img {
+    max-height: 400px;
+    width: 100%;
+    object-fit: cover;
+  }
+}
+
+.post {
+  max-width: 768px;
+  margin: 5rem auto;
+  padding: 0 2rem;
+
+  h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    line-height: 3.625rem;
+  }
+
+  .postContent {
+    margin-top: 4rem;
+    line-height: 2rem;
+    font-size: 1.125rem;
+    color: var(--gray-100);
+
+    text-align: justify;
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 3.5rem;
+    }
+
+    p,
+    ul {
+      margin: 1.5rem 0;
+    }
+
+    ul {
+      li {
+        margin: 0.5rem 0;
+      }
+    }
+  }
+}

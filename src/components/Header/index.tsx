@@ -6,7 +6,7 @@ export default function Header() {
     <header className={styles.headerContainer}>
       <Link href="/">
         <a>
-          <img src="/images/logo.svg" alt="ig.news" />
+          <img src="/images/logo.svg" alt="logo" />
         </a>
       </Link>
     </header>
