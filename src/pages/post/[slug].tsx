@@ -8,6 +8,7 @@ import { getPrismicClient } from '../../services/prismic';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import format from '../../utils/format';
+import { useRouter } from 'next/router';
 
 interface Post {
   first_publication_date: string | null;
@@ -19,21 +20,43 @@ interface Post {
     author: string;
     content: {
       heading: string;
-      body: string;
+      body: {
+        text: string;
+      }[];
     }[];
   };
 }
 
 interface PostProps {
   post: Post;
-  estimatedReadingTime: number;
 }
 
-export default function Post({ post, estimatedReadingTime }: PostProps) {
+export default function Post({ post }: PostProps) {
+  const router = useRouter();
+
+  if (router.isFallback) {
+    return <div className={styles.post}>Carregando...</div>;
+  }
+
+  const getEstimatedTime = () => {
+    let string = '';
+
+    for (const { body, heading } of post.data.content) {
+      string += heading + ' ';
+      for (const { text } of body) {
+        string += text + ' ';
+      }
+    }
+
+    const wordCount = string.match(/(\w+)/g).length;
+    return Math.ceil(wordCount / 200);
+  };
+  const estimatedReadingTime = getEstimatedTime();
+
   return (
     <>
       <Head>
-        <title>{`${`Título`} | ig.news`}</title>
+        <title>{`${post.data.title} | ig.news`}</title>
       </Head>
       <main>
         <article className={styles.container}>
@@ -42,21 +65,28 @@ export default function Post({ post, estimatedReadingTime }: PostProps) {
             <h1>{post.data.title}</h1>
             <div className={commonStyles.postDetails}>
               <span>
-                <FiCalendar /> {post.first_publication_date}
+                <FiCalendar />
+                {format(post.first_publication_date)}
               </span>
               <span>
                 <FiUser /> {post.data.author}
               </span>
               <span>
-                <FiClock /> {estimatedReadingTime} min
+                {/* TODO */}
+                <FiClock /> {`${estimatedReadingTime} min`}
               </span>
             </div>
             <div className={styles.postContent}>
               {post.data.content.map(content => (
-                <>
+                <div key={content.heading}>
                   <h2 className="">{content.heading}</h2>
-                  <div dangerouslySetInnerHTML={{ __html: content.body }}></div>
-                </>
+                  {content.body.map(body => (
+                    <div
+                      key={body.text}
+                      dangerouslySetInnerHTML={{ __html: body.text }}
+                    ></div>
+                  ))}
+                </div>
               ))}
             </div>
           </div>
@@ -66,10 +96,21 @@ export default function Post({ post, estimatedReadingTime }: PostProps) {
   );
 }
 
-export const getStaticPaths = () => {
+export const getStaticPaths: GetStaticPaths = async () => {
   return {
-    paths: [],
-    fallback: 'blocking',
+    paths: [
+      {
+        params: {
+          slug: 'como-utilizar-hooks',
+        },
+      },
+      {
+        params: {
+          slug: 'criando-um-app-cra-do-zero',
+        },
+      },
+    ],
+    fallback: true,
   };
 };
 
@@ -77,28 +118,22 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { slug } = params;
   const prismic = getPrismicClient({});
   const response = await prismic.getByUID('post', String(slug), {});
-  const post = {
-    first_publication_date: format(response.first_publication_date),
-    data: {
-      title: response.data.title,
-      banner: response.data.banner,
-      author: response.data.author,
-      content: response.data.content.map(content => ({
-        heading: content.heading,
-        body: prismicHelper.asHTML(content.body),
-      })),
-    },
-  };
 
-  let string = '';
-  for (const content of response.data.content) {
-    string += content.heading + ' ';
-    string += prismicHelper.asText(content.body) + ' ';
-  }
-  const estimatedReadingTime = Math.ceil(string.match(/(\w+)/g).length / 200);
+  // const post = {
+  //   first_publication_date: response.first_publication_date,
+  //   data: {
+  //     title: response.data.title,
+  //     banner: response.data.banner,
+  //     author: response.data.author,
+  //     content: response.data.content.map(content => ({
+  //       heading: content.heading,
+  //       body: content.body.map(body => ({ text: prismicHelper.asHTML(body) })),
+  //     })),
+  //   },
+  // };
 
   return {
-    props: { post, estimatedReadingTime },
+    props: { post: response },
     revalidate: 60 * 30, //30 minutes
   };
 };

@@ -7,6 +7,7 @@ import format from '../utils/format';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
+import { useState } from 'react';
 
 interface Post {
   uid?: string;
@@ -28,7 +29,19 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
-  const posts = postsPagination.results;
+  const [nextPage, setNextPage] = useState<string>(postsPagination.next_page);
+  const [posts, setPosts] = useState<Post[]>(postsPagination.results);
+
+  const loadMorePosts = async () => {
+    try {
+      const response = await fetch(postsPagination.next_page);
+      const data = await response.json();
+      setNextPage(data.next_page);
+      setPosts(prevPosts => [...prevPosts, ...data.results]);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
 
   return (
     <>
@@ -43,7 +56,7 @@ export default function Home({ postsPagination }: HomeProps) {
               <p>{post.data.subtitle}</p>
               <div className={commonStyles.postDetails}>
                 <span>
-                  <FiCalendar /> {post.first_publication_date}
+                  <FiCalendar /> {format(post.first_publication_date)}
                 </span>
                 <span>
                   <FiUser /> {post.data.author}
@@ -52,8 +65,10 @@ export default function Home({ postsPagination }: HomeProps) {
             </a>
           </Link>
         ))}
-        {postsPagination.next_page && (
-          <button type="button">Carregar mais posts</button>
+        {nextPage && (
+          <button type="button" onClick={loadMorePosts}>
+            Carregar mais posts
+          </button>
         )}
       </main>
     </>
@@ -67,22 +82,9 @@ export const getStaticProps: GetStaticProps = async () => {
     pageSize: 2,
   });
 
-  const posts = response.results.map(post => ({
-    uid: post.uid,
-    first_publication_date: format(post.first_publication_date),
-    data: {
-      title: post.data.title,
-      subtitle: post.data.subtitle,
-      author: post.data.author,
-    },
-  }));
-
   return {
     props: {
-      postsPagination: {
-        next_page: response.next_page,
-        results: posts,
-      },
+      postsPagination: response,
     },
   };
 };
