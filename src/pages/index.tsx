@@ -1,4 +1,5 @@
-import { GetStaticProps } from 'next';
+import Head from 'next/head';
+import Link from 'next/link';
 
 // import { getPrismicClient } from '../services/prismic';
 
@@ -25,7 +26,47 @@ interface HomeProps {
 }
 
 export default function Home() {
-  return <h1>All set</h1>;
+  return (
+    <>
+      <Head>
+        <title>Home | spacetraveling</title>
+      </Head>
+      <main>
+        <div>
+          <Link href={`/`}>
+            <a>
+              <strong>Como utilizar Hooks</strong>
+              <p>Pensando em sincronização em vez de cliclos de vida.</p>
+              <div>
+                <time>15 Mar 2021</time>
+                <span>Joseph Oliveira</span>
+              </div>
+            </a>
+          </Link>
+          <Link href={`/`}>
+            <a>
+              <time>15 Mar 2021</time>
+              <strong>Como utilizar Hooks</strong>
+              <div>
+                <time>15 Mar 2021</time>
+                <span>Joseph Oliveira</span>
+              </div>
+            </a>
+          </Link>
+          <Link href={`/`}>
+            <a>
+              <time>15 Mar 2021</time>
+              <strong>Como utilizar Hooks</strong>
+              <div>
+                <time>15 Mar 2021</time>
+                <span>Joseph Oliveira</span>
+              </div>
+            </a>
+          </Link>
+        </div>
+      </main>
+    </>
+  );
 }
 
 // export const getStaticProps = async () => {
