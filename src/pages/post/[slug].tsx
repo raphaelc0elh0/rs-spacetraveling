@@ -26,9 +26,10 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  estimatedReadingTime: number;
 }
 
-export default function Post({ post }: PostProps) {
+export default function Post({ post, estimatedReadingTime }: PostProps) {
   return (
     <>
       <Head>
@@ -47,7 +48,7 @@ export default function Post({ post }: PostProps) {
                 <FiUser /> {post.data.author}
               </span>
               <span>
-                <FiClock /> 5 min
+                <FiClock /> {estimatedReadingTime} min
               </span>
             </div>
             <div className={styles.postContent}>
@@ -89,8 +90,15 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     },
   };
 
+  let string = '';
+  for (const content of response.data.content) {
+    string += content.heading + ' ';
+    string += prismicHelper.asText(content.body) + ' ';
+  }
+  const estimatedReadingTime = Math.ceil(string.match(/(\w+)/g).length / 200);
+
   return {
-    props: { post },
+    props: { post, estimatedReadingTime },
     revalidate: 60 * 30, //30 minutes
   };
 };
